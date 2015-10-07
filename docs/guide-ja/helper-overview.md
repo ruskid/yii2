@@ -4,7 +4,7 @@
 > Note|注意: この節はまだ執筆中です。
 
 Yii は、一般的なコーディングのタスク、例えば、文字列や配列の操作、HTML コードの生成などを手助けする多くのクラスを提供しています。
-これらのヘルパクラスは `yii\helpers` 名前空間の下に組織されており、すべてスタティックなクラス (すなわち、スタティックなプロパティとメソッドのみを含み、インスタンス化すべきでないクラス) です。
+これらのヘルパクラスは `yii\helpers` 名前空間の下に編成されており、すべてスタティックなクラス (すなわち、スタティックなプロパティとメソッドのみを含み、インスタンス化すべきでないクラス) です。
 
 ヘルパクラスは、そのスタティックなメソッドの一つを直接に呼び出すことによって使用します。
 例えば、
@@ -25,18 +25,18 @@ echo Html::encode('Test > test');
 
 以下のコアヘルパクラスが Yii のリリースにおいて提供されています。
 
-- [ArrayHelper](helper-array.md)
+- [配列ヘルパ](helper-array.md)
 - Console
 - FileHelper
-- [Html](helper-html.md)
+- FormatConverter
+- [Html ヘルパ](helper-html.md)
 - HtmlPurifier
-- Image
+- Imagine (yii2-imagine エクステンションによって提供)
 - Inflector
 - Json
 - Markdown
-- Security
 - StringHelper
-- [Url](helper-url.md)
+- [Url ヘルパ](helper-url.md)
 - VarDumper
 
 

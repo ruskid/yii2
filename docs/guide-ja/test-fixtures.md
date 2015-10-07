@@ -22,7 +22,7 @@ Yii のフィクスチャフレームワークにおける鍵となる概念は�
 前者は汎用目的のフィクスチャに最も適しています。
 一方、後者はデータベースとアクティブレコードを扱うために専用に設計された拡張機能を持っています。
 
-次のコードは、`User` アクティブレコードと対応するテーブルに対するフィクスチャを定義するものです。
+次のコードは、`User` アクティブレコードとそれに対応するテーブルに関して、フィクスチャを定義するものです。
 
 ```php
 <?php
@@ -107,12 +107,12 @@ DB と関係しないフィクスチャ (例えば、何らかのファイルや
 フィクスチャを使用する
 ----------------------
 
-[CodeCeption](http://codeception.com/) を使ってコードをテストしている場合は、フィクスチャのローディングとアクセスを内蔵でサポートしている `yii2-codeception` を使用することを検討すべきです。
+[Codeception](http://codeception.com/) を使ってコードをテストしている場合は、フィクスチャのローディングとアクセスを内蔵でサポートしている `yii2-codeception` を使用することを検討すべきです。
 その他のテストフレームワークを使っている場合は、テストケースで [[yii\test\FixtureTrait]] を使って同じ目的を達することが出来ます。
 
-次に `yii2-codeception` を使って `UserProfile` ユニットテストを各方法を説明します。
+次に `yii2-codeception` を使って `UserProfile` 単体テストを書く方法を説明します。
 
-[[yii\codeception\DbTestCase]] または [[yii\codeception\TestCase]] を拡張するユニットテストクラスにおいて、どのフィクスチャを使用したいかを [[yii\test\FixtureTrait::fixtures()|fixtures()]] メソッドの中で宣言します。
+[[yii\codeception\DbTestCase]] または [[yii\codeception\TestCase]] を拡張する単体テストクラスにおいて、どのフィクスチャを使用したいかを [[yii\test\FixtureTrait::fixtures()|fixtures()]] メソッドの中で宣言します。
 例えば、
 
 ```php
@@ -181,13 +181,13 @@ foreach ($this->profiles as $row) ...
 その必要がなければ、単にそれぞれの個別テストケースとそれに対応するフィクスチャの開発に専念することが出来ます。
 
 
-フィクスチャクラスとデータファイルを組織化する
-----------------------------------------------
+フィクスチャクラスとデータファイルを編成する
+--------------------------------------------
 
 デフォルトでは、フィクスチャクラスは対応するデータファイルを探すときに、フィクスチャのクラスファイルを含むフォルダのサブフォルダである `data` フォルダの中を見ます。
 簡単なプロジェクトではこの規約に従うことができます。
-大きなプロジェクトでは、おそらくは、同じフィクスチャクラスを異なるテストに使うために、データファイルを切り替える必要がある場合がよく生じます。
-従って、クラスの名前空間と同じように、データファイルを階層的な方法で組織化することを推奨します。
+大きなプロジェクトでは、おそらくは、同じフィクスチャクラスを異なるテストに使うために、データファイルを切り替える必要がある場合が頻繁に生じるでしょう。
+従って、クラスの名前空間と同じように、データファイルを階層的な方法で編成することを推奨します。
 例えば、
 
 ```
@@ -207,7 +207,7 @@ data\
 # 等々
 ```
 
-このようにして、テスト間でフィクスチャのデータファイルが衝突するのを回避し、必要に応じてデータファイルを使います。
+このようにして、テスト間でフィクスチャのデータファイルが衝突するのを回避し、必要に応じてデータファイルを使い分けます。
 
 
 > Note|注意: 上の例では、フィクスチャファイルには例示目的だけの名前が付けられています。
@@ -215,7 +215,7 @@ data\
 > 例えば、DB フィクスチャを [[yii\test\ActiveFixture]] から拡張している場合は、DB テーブルの名前をフィクスチャのデータファイル名として使うべきです。
 > MongoDB フィクスチャを [[yii\mongodb\ActiveFixture]] から拡張している場合は、コレクション名をファイル名として使うべきです。
 
-同様な階層は、フィクスチャクラスファイルを組織化するのにも使うことが出来ます。
+同様な階層は、フィクスチャクラスファイルを編成するのにも使うことが出来ます。
 `data` をルートディレクトリとして使うのでなく、データファイルとの衝突を避けるために `fixtures` をルートディレクトリとして使うのが良いでしょう。
 
 
@@ -373,4 +373,4 @@ Auto-generating fixtures
 
 Yii also can auto-generate fixtures for you based on some template. You can generate your fixtures with different data on different languages and formats.
 These feature is done by [Faker](https://github.com/fzaninotto/Faker) library and `yii2-faker` extension.
-See extension [guide](https://github.com/yiisoft/yii2/tree/master/extensions/faker) for more docs.
+See extension [guide](https://github.com/yiisoft/yii2-faker) for more docs.

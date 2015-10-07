@@ -77,7 +77,7 @@ class Controller extends \yii\base\Controller
     {
         if (!empty($params)) {
             // populate options here so that they are available in beforeAction().
-            $options = $this->options($id);
+            $options = $this->options($id === '' ? $this->defaultAction : $id);
             foreach ($params as $name => $value) {
                 if (in_array($name, $options, true)) {
                     $default = $this->$name;
@@ -109,16 +109,27 @@ class Controller extends \yii\base\Controller
             $method = new \ReflectionMethod($action, 'run');
         }
 
-        $args = array_values($params);
+        $params = array_values($params);
 
+        $args = [];
         $missing = [];
-        foreach ($method->getParameters() as $i => $param) {
-            if ($param->isArray() && isset($args[$i])) {
-                $args[$i] = preg_split('/\s*,\s*/', $args[$i]);
+        foreach ($method->getParameters() as $param) {
+            if (($class = $param->getClass()) !== null) {
+                $name = $param->getName();
+                $className = $class->getName();
+                if (Yii::$app->has($name) && ($obj = Yii::$app->get($name)) instanceof $className) {
+                    $args[] = $obj;
+                } else {
+                    $args[] = Yii::$container->get($className);
+                }
+                continue;
             }
-            if (!isset($args[$i])) {
+            $value = array_shift($params);
+            if (isset($value)) {
+                $args[] = $param->isArray() ? preg_split('/\s*,\s*/', $value) : $value;
+            } else {
                 if ($param->isDefaultValueAvailable()) {
-                    $args[$i] = $param->getDefaultValue();
+                    $args[] = $param->getDefaultValue();
                 } else {
                     $missing[] = $param->getName();
                 }
@@ -129,6 +140,9 @@ class Controller extends \yii\base\Controller
             throw new Exception(Yii::t('yii', 'Missing required arguments: {params}', ['params' => implode(', ', $missing)]));
         }
 
+        foreach ($params as $value) {
+            $args[] = $value;
+        }
         return $args;
     }
 
@@ -488,7 +502,7 @@ class Controller extends \yii\base\Controller
     {
         $docLines = preg_split('~\R~u', $reflection->getDocComment());
         if (isset($docLines[1])) {
-            return trim($docLines[1], ' *');
+            return trim($docLines[1], "\t *");
         }
         return '';
     }

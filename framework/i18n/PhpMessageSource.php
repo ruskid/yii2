@@ -34,8 +34,7 @@ use Yii;
 class PhpMessageSource extends MessageSource
 {
     /**
-     * @var string the base path for all translated messages. Defaults to null, meaning
-     * the "messages" subdirectory of the application directory (e.g. "protected/messages").
+     * @var string the base path for all translated messages. Defaults to '@app/messages'.
      */
     public $basePath = '@app/messages';
     /**
@@ -114,7 +113,7 @@ class PhpMessageSource extends MessageSource
     /**
      * Loads the message translation for the specified language and category or returns null if file doesn't exist.
      *
-     * @param $messageFile string path to message file
+     * @param string $messageFile path to message file
      * @return array|null array of messages or null if file not found
      */
     protected function loadMessagesFromFile($messageFile)

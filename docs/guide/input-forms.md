@@ -1,16 +1,16 @@
-Working with Forms
-==================
+Creating Forms
+==============
 
 The primary way of using forms in Yii is through [[yii\widgets\ActiveForm]]. This approach should be preferred when
 the form is based upon a model. Additionally, there are some useful methods in [[yii\helpers\Html]] that are typically
 used for adding buttons and help text to any form.
 
-A form, that is displayed on the client side, will in most cases have a corresponding model which is used
+A form, that is displayed on the client side, will in most cases have a corresponding [model](structure-models.md) which is used
 to validate its input on the server side (Check the [Validating Input](input-validation.md) section for more details on validation).
 When creating model-based forms, the first step is to define the model itself. The model can be either based upon
 an [Active Record](db-active-record.md) class, representing some data from the database, or a generic Model class
 (extending from [[yii\base\Model]]) to capture arbitrary input, for example a login form.
-In the following example we show, how a generic Model is used for a login form:
+In the following example, we show how a generic model can be used for a login form:
 
 ```php
 <?php
@@ -74,8 +74,8 @@ To customize the output, you can chain additional methods of [[yii\widgets\Activ
 ```
 
 This will create all the `<label>`, `<input>` and other tags according to the [[yii\widgets\ActiveField::$template|template]] defined by the form field.
-The name of the input field is determined automatically from the models [[yii\base\Model::formName()|form name] and attribute,
-e.g. the name for the input field for the `username` attribute in the above example will be `LoginForm[username]` which will result in an array
+The name of the input field is determined automatically from the model's [[yii\base\Model::formName()|form name]] and the attribute name.
+For example, the name for the input field for the `username` attribute in the above example will be `LoginForm[username]`. This naming rule will result in an array
 of all attributes for the login form to be available in `$_POST['LoginForm']` on the server side.
 
 Specifying the attribute of the model can be done in more sophisticated ways. For example when an attribute may
@@ -90,16 +90,23 @@ echo $form->field($model, 'uploadFile[]')->fileInput(['multiple'=>'multiple']);
 echo $form->field($model, 'items[]')->checkboxList(['a' => 'Item A', 'b' => 'Item B', 'c' => 'Item C']);
 ```
 
-Additional HTML tags can be added using plain HTML or using the methods from the [[yii\helpers\Html|Html]]-helper
+Be careful when naming form elements such as submit buttons. According to the [jQuery documentation](https://api.jquery.com/submit/) there
+are some reserved names that can cause conflicts:
+
+> Forms and their child elements should not use input names or ids that conflict with properties of a form,
+> such as `submit`, `length`, or `method`. Name conflicts can cause confusing failures.
+> For a complete list of rules and to check your markup for these problems, see [DOMLint](http://kangax.github.io/domlint/). 
+
+Additional HTML tags can be added to the form using plain HTML or using the methods from the [[yii\helpers\Html|Html]]-helper
 class like it is done in the above example with [[yii\helpers\Html::submitButton()|Html::submitButton()]].
 
 
 > Tip: If you are using Twitter Bootstrap CSS in your application you may want to use
-> [[yii\bootstrap\ActiveForm]] instead of [[yii\widgets\ActiveForm]], which is an extension of the
-> ActiveForm class that adds some additional styling that works well with the bootstrap CSS framework.
+> [[yii\bootstrap\ActiveForm]] instead of [[yii\widgets\ActiveForm]]. The former extends from the latter and
+> uses Bootstrap-specific styles when generating form input fields.
 
 
-> Tip: in order to style required fields with asterisk you can use the following CSS:
+> Tip: In order to style required fields with asterisks, you can use the following CSS:
 >
 > ```css
 > div.required label:after {
@@ -108,73 +115,36 @@ class like it is done in the above example with [[yii\helpers\Html::submitButton
 > }
 > ```
 
+Creating Dropdown list <span id="creating-activeform-dropdownlist"></span>
+---------------------
 
-Handling multiple models with a single form
--------------------------------------------
-
-> Note: This section is under development.
-
-Sometimes you need to handle multiple models of the same kind in a single form. For example, multiple settings where
-each setting is stored as name-value and is represented by `Setting` model. This kind of form is also often
-referred to as "tabular input". In contrast to this, handling different models of different kind, is handled in the section
-[Complex Forms with Multiple Models](input-multiple-models).
-
-
-The following shows how to implement tabular input with Yii.
-
-Let's start with controller action:
+We can use ActiveForm [dropDownList()](http://www.yiiframework.com/doc-2.0/yii-widgets-activefield.html#dropDownList()-detail)
+method to create a Dropwown list: 
 
 ```php
-<?php
+use app\models\ProductCategory;
+use yii\helpers\ArrayHelper;
 
-namespace app\controllers;
+/* @var $this yii\web\View */
+/* @var $form yii\widgets\ActiveForm */
+/* @var $model app\models\Product */
 
-use Yii;
-use yii\base\Model;
-use yii\web\Controller;
-use app\models\Setting;
-
-class SettingsController extends Controller
-{
-    // ...
-
-    public function actionUpdate()
-    {
-        $settings = Setting::find()->indexBy('id')->all();
-
-        if (Model::loadMultiple($settings, Yii::$app->request->post()) && Model::validateMultiple($settings)) {
-            foreach ($settings as $setting) {
-                $setting->save(false);
-            }
-
-            return $this->redirect('index');
-        }
-
-        return $this->render('update', ['settings' => $settings]);
-    }
-}
+echo $form->field($model, 'product_category')->dropdownList(
+    ProductCategory::find()->select(['category_name', 'id'])->indexBy('id')->column(),
+    ['prompt'=>'Select Category']
+);
 ```
 
-In the code above we're using `indexBy` when retrieving models from the database to populate an array indexed by model ids.
-These will be later used to identify form fields. `loadMultiple` fills multiple models with the form data coming from POST
-and `validateMultiple` validates all models at once. In order to skip validation when saving we're passing `false` as
-a parameter to `save`.
+The value of your model field will be automatically pre-selected.
 
-Now the form that's in `update` view:
+Further Reading <span id="further-reading"></span>
+---------------
 
-```php
-<?php
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+The next section [Validating Input](input-validation.md) handles the validation of the submitted form data on the server
+side as well as ajax- and client side validation.
 
-$form = ActiveForm::begin();
+To read about more complex usage of forms, you may want to check out the following sections:
 
-foreach ($settings as $index => $setting) {
-    echo Html::encode($setting->name) . ': ' . $form->field($setting, "[$index]value");
-}
-
-ActiveForm::end();
-```
-
-Here for each setting we are rendering name and an input with a value. It is important to add a proper index
-to input name since that is how `loadMultiple` determines which model to fill with which values.
+- [Collecting Tabular Input](input-tabular-input.md) for collecting data for multiple models of the same kind.
+- [Getting Data for Multiple Models](input-multiple-models.md) for handling multiple different models in the same form.
+- [Uploading Files](input-file-upload.md) on how to use forms for uploading files.

@@ -63,7 +63,7 @@ class YiiRequirementChecker
      * @param array|string $requirements requirements to be checked.
      * If an array, it is treated as the set of requirements;
      * If a string, it is treated as the path of the file, which contains the requirements;
-     * @return static self instance.
+     * @return $this self instance.
      */
     function check($requirements)
     {
@@ -254,20 +254,16 @@ class YiiRequirementChecker
         }
         switch (strtolower($sizeUnit)) {
             case 'kb':
-            case 'k': {
+            case 'k':
                 return $size * 1024;
-            }
             case 'mb':
-            case 'm': {
+            case 'm':
                 return $size * 1024 * 1024;
-            }
             case 'gb':
-            case 'g': {
+            case 'g':
                 return $size * 1024 * 1024 * 1024;
-            }
-            default: {
+            default:
                 return 0;
-            }
         }
     }
 

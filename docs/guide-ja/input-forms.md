@@ -1,72 +1,41 @@
-フォームを扱う
-==============
+フォームを作成する
+==================
 
-> Note|注意: この節はまだ執筆中です。
+Yii においてフォームを使用するときは、主として [[yii\widgets\ActiveForm]] による方法を使います。
+フォームがモデルに基づくものである場合はこの方法を選ぶべきです。
+これに加えて、[[yii\helpers\Html]] にはいくつかの有用なメソッドがあり、どんなフォームでも、ボタンやヘルプテキストを追加するのには、通常、それらのメソッドを使います。
 
-Yii においてフォームを使用する主たる方法は [[yii\widgets\ActiveForm]] によるものです。
-フォームがモデルに基づくものである場合はこの方法を優先すべきです。
-これに加えて、[[yii\helpers\Html]] にはいくつかの有用なメソッドがあり、通常は、あらゆるフォームにボタンやヘルプテキストを追加するのに使うことが出来ます。
-
+フォームは、クライアント側で表示されるものですが、たいていの場合、対応する [モデル](structure-models.md) を持ち、それを使ってサーバ側でフォームの入力を検証します
+(入力の検証の詳細については、[入力を検証する](input-validation.md) の節を参照してください)。
 モデルに基づくフォームを作成する場合、最初のステップは、モデルそのものを定義することです。
-モデルは、アクティブレコードクラス、あるいは、もっと汎用的な Model クラスから派生させることが出来ます。
-このログインフォームの例では、汎用的なモデルを使用します。
+モデルは、データベースの何らかのデータを表現するために [アクティブレコード](db-active-record.md) から派生させたクラスか、あるいは、任意の入力、例えばログインフォームの入力を保持するための ([[yii\base\Model]] から派生させた) 汎用的な Model クラスか、どちらかにすることが出来ます。
+以下の例においては、ログインフォームのために汎用的なモデルを使う方法を示します。
 
 ```php
-use yii\base\Model;
+<?php
 
-class LoginForm extends Model
+class LoginForm extends \yii\base\Model
 {
     public $username;
     public $password;
 
-    /**
-     * @return array 検証規則
-     */
     public function rules()
     {
         return [
-            // username と password はともに必須
-            [['username', 'password'], 'required'],
-            // password は validatePassword() によって検証される
-            ['password', 'validatePassword'],
+            // 検証規則をここで定義
         ];
     }
 
-    /**
-     * パスワードを検証する
-     * このメソッドがパスワードのインライン検証に使用される
-     */
-    public function validatePassword()
-    {
-        $user = User::findByUsername($this->username);
-        if (!$user || !$user->validatePassword($this->password)) {
-            $this->addError('password', 'Incorrect username or password.');
-        }
-    }
-
-    /**
-     * 提供された username と password でユーザをログインさせる。
-     * @return boolean ユーザのログインが成功したかどうか
-     */
-    public function login()
-    {
-        if ($this->validate()) {
-            $user = User::findByUsername($this->username);
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
 ```
 
-コントローラはこのモデルのインスタンスをビューに渡し、ビューでは [[yii\widgets\ActiveForm|ActiveForm]] ウィジェットが使われます。
+コントローラにおいて、このモデルのインスタンスをビューに渡し、ビューでは [[yii\widgets\ActiveForm|ActiveForm]] ウィジェットがフォームを表示するのに使われます。
 
 ```php
+<?php
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
 
-<?php $form = ActiveForm::begin([
+$form = ActiveForm::begin([
     'id' => 'login-form',
     'options' => ['class' => 'form-horizontal'],
 ]) ?>
@@ -81,33 +50,33 @@ use yii\widgets\ActiveForm;
 <?php ActiveForm::end() ?>
 ```
 
-上記のコードでは、[[yii\widgets\ActiveForm::begin()|ActiveForm::begin()]] がフォームのインスタンスを作成するだけでなく、フォームの開始をマークしています。
-[[yii\widgets\ActiveForm::begin()|ActiveForm::begin()]] と [[yii\widgets\ActiveForm::end()|ActiveForm::end()]] の間に置かれた全てのコンテントが `<form>` タグによって囲まれます。
-その他のウィジェットと同じように、ウィジェットをどのように構成すべきかに関するオプションを指定するために、`begin` メソッドに配列を渡すことが出来ます。
-この例では、追加の CSS クラスと要素を特定するための ID が渡されて、開始 `<form>` タグに適用されています。
+上記のコードでは、[[yii\widgets\ActiveForm::begin()|ActiveForm::begin()]] がフォームのインスタンスを作成するとともに、フォームの開始をマークしています。
+[[yii\widgets\ActiveForm::begin()|ActiveForm::begin()]] と [[yii\widgets\ActiveForm::end()|ActiveForm::end()]] の間に置かれた全てのコンテントが HTML の `<form>` タグによって囲まれます。
+どのウィジェットでも同じですが、ウィジェットをどのように構成すべきかに関するオプションを指定するために、`begin` メソッドに配列を渡すことが出来ます。
+この例では、追加の CSS クラスと要素を特定するための ID が渡されて、`<form>` の開始タグに適用されています。
+利用できるオプションの全ては [[yii\widgets\ActiveForm]] の API ドキュメントに記されていますので参照してください。
 
-フォームの中で、フォームの要素を作成するために、ActiveForm ウィジェットの [[yii\widgets\ActiveForm::field()|ActiveForm::field()]] メソッドが呼ばれています。このメソッドは、要素のラベルと、適用できる JavaScript の検証メソッドがあれば、それらも追加します。
+フォームの中では、フォームの要素を作成するために、ActiveForm ウィジェットの [[yii\widgets\ActiveForm::field()|ActiveForm::field()]] メソッドが呼ばれています。
+このメソッドは、フォームの要素だけでなく、そのラベルも作成し、適用できる JavaScript の検証メソッドがあれば、それも追加します。
+[[yii\widgets\ActiveForm::field()|ActiveForm::field()]] メソッドは、[[yii\widgets\ActiveField]] のインスタンスを返します。
 このメソッドの呼び出し結果を直接にエコーすると、結果は通常の (text の) インプットになります。
-出力結果をカスタマイズするためには、このメソッドの呼び出しに追加のメソッドをチェーンします。
+このメソッドの呼び出しに追加の [[yii\widgets\ActiveField|ActiveField]] のメソッドをチェーンして、出力結果をカスタマイズすることが出来ます。
 
 ```php
+// パスワードのインプット
 <?= $form->field($model, 'password')->passwordInput() ?>
-
-// または
-
+// ヒントとカスタマイズしたラベルを追加
 <?= $form->field($model, 'username')->textInput()->hint('お名前を入力してください')->label('お名前') ?>
-```
-
-これで、フォームのフィールドによって定義されたテンプレートに従って、`<label>`、`<input>` など、全てのタグが生成されます。
-これらのタグを自分で追加するためには、`Html` ヘルパクラスを使うことが出来ます。
-
-HTML5 のフィールドを使いたい場合は、次のように、インプットのタイプを直接に指定することが出来ます。
-
-```php
+// HTML5 のメールインプット要素を作成
 <?= $form->field($model, 'email')->input('email') ?>
 ```
 
-モデルの属性を指定するためには、もっと洗練された方法を使うことも出来ます。
+これで、フォームのフィールドによって定義された [[yii\widgets\ActiveField::$template|テンプレート]] に従って、`<label>`、`<input>` など、全てのタグが生成されます。
+インプットフィールドの名前は、モデルの [[yii\base\Model::formName()|フォーム名]] と属性から自動的に決定されます。
+例えば、上記の例における `username` 属性のインプットフィールドの名前は `LoginForm[username]` となります。
+この命名規則の結果として、ログインフォームの全ての属性が配列として、サーバ側においては `$_POST['LoginForm']` に格納されて利用できることになります。
+
+モデルの属性を指定するために、もっと洗練された方法を使うことも出来ます。
 例えば、複数のファイルをアップロードしたり、複数の項目を選択したりする場合に、属性の名前に `[]` を付けて、属性が配列の値を取り得ることを指定することが出来ます。
 
 ```php
@@ -118,74 +87,56 @@ echo $form->field($model, 'uploadFile[]')->fileInput(['multiple'=>'multiple']);
 echo $form->field($model, 'items[]')->checkboxList(['a' => 'Item A', 'b' => 'Item B', 'c' => 'Item C']);
 ```
 
-> **tip**|**ヒント**: 必須フィールドをアスタリスク付きのスタイルにするために、次の CSS を使うことが出来ます。
+送信ボタンなどのフォーム要素に名前をつけるときには注意が必要です。
+[jQuery ドキュメント](https://api.jquery.com/submit/) によれば、衝突を生じさせ得る予約された名前がいくつかあります。
+
+> フォームおよびフォームの子要素は、フォームのプロパティと衝突するインプット名や id、たとえば `submit`、`length`、`method` などを使ってはなりません。
+> 名前の衝突は訳の分らない失敗を生じさせることがあります。
+> 命名規則の完全なリストを知り、この問題についてあなたのマークアップをチェックするためには、[DOMLint](http://kangax.github.io/domlint/) を参照してください。
+
+フォームに HTML タグを追加するためには、素の HTML を使うか、または、上記の例の [[yii\helpers\Html::submitButton()|Html::submitButton()]] のように、[[yii\helpers\Html|Html]] ヘルパクラスのメソッドを使うことが出来ます。
+
+> Tip|ヒント: あなたのアプリケーションで Twitter Bootstrap CSS を使っている場合は、[[yii\widgets\ActiveForm]] の代りに [[yii\bootstrap\ActiveForm]] を使うのが良いでしょう。
+> 後者は前者の拡張であり、bootstrap CSS フレームワークで使用するための追加のスタイルをサポートしています。
+
+> tip|ヒント: 必須フィールドをアスタリスク付きのスタイルにするために、次の CSS を使うことが出来ます。
 >
-```css
-div.required label:after {
-    content: " *";
-    color: red;
-}
-```
+>```css
+>div.required label:after {
+>    content: " *";
+>    color: red;
+>}
+>```
 
-一つのフォームで複数のモデルを扱う
-----------------------------------
+ドロップダウンリストを作る <span id="creating-activeform-dropdownlist"></span>
+--------------------------
 
-時として、一つのフォームで同じ種類の複数のモデルを扱わなければならないことがあります。
-例えば、それぞれが「名前-値」の形で保存され、`Setting` モデルとして表される複数の設定項目を扱うフォームです。
-以下に、これを Yii で実装する方法を示します。
-
-コントローラアクションから始めましよう。
+ActiveForm の [dropDownList()](http://www.yiiframework.com/doc-2.0/yii-widgets-activefield.html#dropDownList()-detail)
+メソッドを使ってドロップダウンリストを作ることが出来ます。
 
 ```php
-namespace app\controllers;
+use app\models\ProductCategory;
+use yii\helpers\ArrayHelper;
 
-use Yii;
-use yii\base\Model;
-use yii\web\Controller;
-use app\models\Setting;
+/* @var $this yii\web\View */
+/* @var $form yii\widgets\ActiveForm */
+/* @var $model app\models\Product */
 
-class SettingsController extends Controller
-{
-    // ...
-
-    public function actionUpdate()
-    {
-        $settings = Setting::find()->indexBy('id')->all();
-
-        if (Model::loadMultiple($settings, Yii::$app->request->post()) && Model::validateMultiple($settings)) {
-            foreach ($settings as $setting) {
-                $setting->save(false);
-            }
-
-            return $this->redirect('index');
-        }
-
-        return $this->render('update', ['settings' => $settings]);
-    }
-}
+echo $form->field($model, 'product_category')->dropdownList(
+    ProductCategory::find()->select(['category_name', 'id'])->indexBy('id')->column(),
+    ['prompt'=>'カテゴリを選択してください']
+);
 ```
 
-上記のコードでは、データベースからモデルを読み出すときに `indexBy` を使って、モデルの ID でインデックスされた配列にモデルを代入しています。
-このインデックスが、後で、フォームフィールドを特定するために使われます。
-`loadMultiple` が POST から来るフォームデータを複数のモデルに代入し、`validateMultiple` が全てのモデルを一度に検証します。
-保存するときの検証をスキップするために、`save` のパラメータに `false` を渡しています。
+モデルのフィールドの値は、前もって自動的に選択されます。
 
-次に、`update` ビューにあるフォームです。
+さらに読むべき文書 <span id="further-reading"></span>
+------------------
 
-```php
-<?php
-use yii\helpers\Html;
-use yii\widgets\ActiveForm;
+次の節 [入力を検証する](input-validation.md) は、送信されたフォームデータのサーバ側でのバリデーションと、ajax バリデーションおよびクライアント側バリデーションを扱います。
 
-$form = ActiveForm::begin();
+フォームのもっと複雑な使用方法については、以下の節を読んで下さい。
 
-foreach ($settings as $index => $setting) {
-    echo Html::encode($setting->name) . ': ' . $form->field($setting, "[$index]value");
-}
-
-ActiveForm::end();
-```
-
-ここで全ての設定項目について、それぞれ、名前と値を入れたインプットをレンダリングしています。
-インプットの名前に適切なインデックスを追加することが肝腎です。
-というのは、`loadMultiple` がそれを見て、どのモデルにどの値を代入するかを決定するからです。
+- [表形式インプットのデータ収集](input-tabular-input.md) - 同じ種類の複数のモデルのデータを収集する。
+- [複数のモデルのデータを取得する](input-multiple-models.md) - 同じフォームの中で複数の異なるモデルを扱う。
+- [ファイルをアップロードする](input-file-upload.md) - フォームを使ってファイルをアップロードする方法。

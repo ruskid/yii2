@@ -80,7 +80,7 @@ use yii\caching\Cache;
  * You also can use shortcut for the above like the following:
  *
  * ~~~
- * $connection->transaction(function() {
+ * $connection->transaction(function () {
  *     $order = new Order($customer);
  *     $order->save();
  *     $order->addItems($items);
@@ -90,7 +90,7 @@ use yii\caching\Cache;
  * If needed you can pass transaction isolation level as a second parameter:
  *
  * ~~~
- * $connection->transaction(function(Connection $db) {
+ * $connection->transaction(function (Connection $db) {
  *     //return $db->...
  * }, Transaction::READ_UNCOMMITTED);
  * ~~~
@@ -571,8 +571,12 @@ class Connection extends Component
             } elseif (($pos = strpos($this->dsn, ':')) !== false) {
                 $driver = strtolower(substr($this->dsn, 0, $pos));
             }
-            if (isset($driver) && ($driver === 'mssql' || $driver === 'dblib' || $driver === 'sqlsrv')) {
-                $pdoClass = 'yii\db\mssql\PDO';
+            if (isset($driver)) {
+                if ($driver === 'mssql' || $driver === 'dblib') {
+                    $pdoClass = 'yii\db\mssql\PDO';
+                } elseif ($driver === 'sqlsrv') {
+                    $pdoClass = 'yii\db\mssql\SqlsrvPDO';
+                }
             }
         }
 
